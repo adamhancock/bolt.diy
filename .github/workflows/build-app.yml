@@ -8,6 +8,8 @@ on:
     paths:
       - 'app/*'
       - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - 'Dockerfile-a9k'
   # Allow manual trigger
   workflow_dispatch:
 concurrency:
@@ -43,6 +45,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
+          file: Dockerfile-a9k
           context: .
           cache-from: type=gha
           cache-to: type=gha,mode=max
