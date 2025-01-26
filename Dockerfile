@@ -31,8 +31,10 @@ ARG TOGETHER_API_BASE_URL
 ARG AWS_BEDROCK_CONFIG
 ARG VITE_LOG_LEVEL=debug
 ARG DEFAULT_NUM_CTX
+ARG NODE_ENV=production
 
-ENV WRANGLER_SEND_METRICS=false \
+ENV NODE_ENV=${NODE_ENV} \
+  WRANGLER_SEND_METRICS=false \
   GROQ_API_KEY=${GROQ_API_KEY} \
   HuggingFace_KEY=${HuggingFace_API_KEY} \
   OPENAI_API_KEY=${OPENAI_API_KEY} \
@@ -49,11 +51,14 @@ ENV WRANGLER_SEND_METRICS=false \
 RUN mkdir -p /root/.config/.wrangler && \
   echo '{"enabled":false}' > /root/.config/.wrangler/metrics.json
 
-RUN npm install -g vite
+# Install dependencies needed for production
+RUN npm install -g wrangler vite
 
+# Build the application
 RUN pnpm run build
 
-CMD [ "pnpm", "run", "dockerstart"]
+# Start the server using wrangler
+CMD ["sh", "-c", "bindings=$(./bindings.sh) && wrangler pages dev ./build/client $bindings --ip 0.0.0.0 --port 5173"]
 
 # Development image
 FROM base AS bolt-ai-development
